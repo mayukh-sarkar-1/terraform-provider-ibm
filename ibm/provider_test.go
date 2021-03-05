@@ -29,6 +29,7 @@ var privateVlanID string
 var privateSubnetID string
 var publicSubnetID string
 var subnetID string
+var reservedIPID string
 var lbaasDatacenter string
 var lbaasSubnetId string
 var ipsecDatacenter string
@@ -218,6 +219,12 @@ func init() {
 	if subnetID == "" {
 		subnetID = "1165645"
 		fmt.Println("[WARN] Set the environment variable IBM_SUBNET_ID for testing ibm_container_cluster resource else it is set to default value '1165645'")
+	}
+
+	subnetID = os.Getenv("IBM_RESERVED_IP_ID")
+	if subnetID == "" {
+		subnetID = "1165645"
+		fmt.Println("[WARN] Set the environment variable IBM_RESERVED_IP_ID for testing ibm_container_cluster resource else it is set to default value '1165645'")
 	}
 
 	ipsecDatacenter = os.Getenv("IBM_IPSEC_DATACENTER")

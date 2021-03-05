@@ -250,6 +250,8 @@ func Provider() *schema.Provider {
 			"ibm_is_ssh_key":                         dataSourceIBMISSSHKey(),
 			"ibm_is_subnet":                          dataSourceIBMISSubnet(),
 			"ibm_is_subnets":                         dataSourceIBMISSubnets(),
+			"ibm_is_subnet_reserved_ip":              dataSourceIBMISReservedIP(),
+			"ibm_is_subnet_reserved_ips":             dataSourceIBMISReservedIPs(),
 			"ibm_is_security_group":                  dataSourceIBMISSecurityGroup(),
 			"ibm_is_volume":                          dataSourceIBMISVolume(),
 			"ibm_is_volume_profile":                  dataSourceIBMISVolumeProfile(),

@@ -39,7 +39,7 @@ func testAccIBMISReservedIPSdataSoruceConfig() string {
 	return fmt.Sprintf(`
 
       data "ibm_is_subnet_reserved_ips" "test_res_ip" {
-      	subnet_id = "0716-d335ad68-1538-4d9f-8bc4-04c745f662c2"
+      	subnet_id = "0716-64099f76-9a1d-4fbf-9fb9-9456c3692b5d"
       }
       `)
 }

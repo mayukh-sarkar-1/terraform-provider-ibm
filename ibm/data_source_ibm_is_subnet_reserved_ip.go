@@ -133,6 +133,12 @@ func dataSdataSourceIBMISReservedIPRead(d *schema.ResourceData, meta interface{}
 	// Get the inputs mentioned in the terraform script (Request Params)
 	subnetID := d.Get(isSubNetID).(string)
 	reservedIPID := d.Get(isReservedIPID).(string)
+	// The reserved IP might be created with the combination of both subnet ID and reserved IP id
+	// separated by '/'. So we should check it and split if required
+	parts, err := idParts(reservedIPID)
+	if err == nil {
+		reservedIPID = parts[1]
+	}
 	msg := fmt.Sprintf("Trying to retrive the reserved IP for Subnet id: %s and reserved ip ID: %s", subnetID, reservedIPID)
 	fmt.Println(" ✅ " + "\033[35m" + msg + "\033[0m")
 

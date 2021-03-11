@@ -14,32 +14,52 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccIBMISReservedIP_basic(t *testing.T) {
 	// resName := "manual-reserve-i"
-
+	vpcName := fmt.Sprintf("tfresip-vpc-%d", acctest.RandIntRange(10, 100))
+	subnetName := fmt.Sprintf("tfresip-subnet-%d", acctest.RandIntRange(10, 100))
+	resIPName := fmt.Sprintf("tfresip-reservedip-%d", acctest.RandIntRange(10, 100))
+	terraformTag := "data.ibm_is_subnet_reserved_ip.data_resip1"
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIBMISReservedIPdataSoruceConfig(),
-				// Check:  resource.ComposeTestCheckFunc(
-				// // resource.TestCheckResourceAttr("data.ibm_is_subnet_reserved_ip.test_res_ip", "name", reservedIPName),
-				// ),
+				Config: testAccIBMISReservedIPdataSoruceConfig(vpcName, subnetName, resIPName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(terraformTag, isReservedIPName, resIPName),
+				),
 			},
 		},
 	})
 }
 
-func testAccIBMISReservedIPdataSoruceConfig() string {
+func testAccIBMISReservedIPdataSoruceConfig(vpcName, subnetName, reservedIPName string) string {
 	// status filter defaults to empty
 	return fmt.Sprintf(`
-      data "ibm_is_subnet_reserved_ip" "test_res_ip" {
-      	subnet_id = "0716-d335ad68-1538-4d9f-8bc4-04c745f662c2"
-      	id = "0716-7de74d73-4686-41ec-8e65-c84a173a75bf"
-      }
-      `)
+		resource "ibm_is_vpc" "vpc1" {
+			name = "%s"
+		}
+
+		resource "ibm_is_subnet" "subnet1" {
+			name                     = "%s"
+			vpc                      = ibm_is_vpc.vpc1.id
+			zone                     = "us-south-1"
+			total_ipv4_address_count = 256
+		}
+
+		resource "ibm_is_subnet_reserved_ip" "resip1" {
+			subnet = ibm_is_subnet.subnet1.id
+			name = "%s"
+		}
+
+		data "ibm_is_subnet_reserved_ip" "data_resip1" {
+			subnet = ibm_is_subnet.subnet1.id
+			reserved_ip = ibm_is_subnet_reserved_ip.resip1.reserved_ip
+		}
+      `, vpcName, subnetName, reservedIPName)
 }

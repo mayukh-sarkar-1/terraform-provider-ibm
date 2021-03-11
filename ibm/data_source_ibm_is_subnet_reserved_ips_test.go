@@ -14,32 +14,58 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccIBMISReservedIPs_basic(t *testing.T) {
-	resName := "data.ibm_is_subnet_reserved_ips.test_res_ip"
+	terraformTag := "data.ibm_is_subnet_reserved_ips.data_resip"
+	vpcName := fmt.Sprintf("tfresip-vpc-%d", acctest.RandIntRange(10, 100))
+	subnetName := fmt.Sprintf("tfresip-subnet-%d", acctest.RandIntRange(10, 100))
+	reservedIPName := fmt.Sprintf("tfresip-reservedip-%d", acctest.RandIntRange(10, 100))
+	reservedIPName2 := fmt.Sprintf("tfresip-reservedip-%d", acctest.RandIntRange(10, 100))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIBMISReservedIPSdataSoruceConfig(),
+				Config: testAccIBMISReservedIPSdataSoruceConfig(vpcName, subnetName, reservedIPName, reservedIPName2),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(resName, "reserved_ips.0.address"),
+					resource.TestCheckResourceAttrSet(terraformTag, "reserved_ips.0.address"),
+					// resource.TestCheckResourceAttrSet(terraformTag, "reserved_ips.1.address"),
 				),
 			},
 		},
 	})
 }
 
-func testAccIBMISReservedIPSdataSoruceConfig() string {
+func testAccIBMISReservedIPSdataSoruceConfig(vpcName, subnetName, reservedIPName, reservedIPName2 string) string {
 	// status filter defaults to empty
 	return fmt.Sprintf(`
+		resource "ibm_is_vpc" "vpc1" {
+			name = "%s"
+		}
 
-      data "ibm_is_subnet_reserved_ips" "test_res_ip" {
-      	subnet_id = "0716-64099f76-9a1d-4fbf-9fb9-9456c3692b5d"
-      }
-      `)
+		resource "ibm_is_subnet" "subnet1" {
+			name                     = "%s"
+			vpc                      = ibm_is_vpc.vpc1.id
+			zone                     = "us-south-1"
+			total_ipv4_address_count = 256
+		}
+
+		resource "ibm_is_subnet_reserved_ip" "resip1" {
+			subnet = ibm_is_subnet.subnet1.id
+			name = "%s"
+		}
+		
+		resource "ibm_is_subnet_reserved_ip" "resip2" {
+			subnet = ibm_is_subnet.subnet1.id
+			name = "%s"
+		}
+        
+		data "ibm_is_subnet_reserved_ips" "data_resip" {
+      	  subnet = ibm_is_subnet.subnet1.id
+        }
+      `, vpcName, subnetName, reservedIPName, reservedIPName2)
 }

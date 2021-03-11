@@ -20,9 +20,9 @@ func TestAccIBMISSubnetReservedIP_Basic(t *testing.T) {
 	reservedIPName2 := fmt.Sprintf("tfresip-reservedip-%d", acctest.RandIntRange(10, 100))
 	terraformTag := "ibm_is_subnet_reserved_ip.resIP1"
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
-		// CheckDestroy: ,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckisSubnetReservedIPDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckISSubnetReservedIPConfigBasic(vpcName, subnetName, reservedIPName),
@@ -40,6 +40,31 @@ func TestAccIBMISSubnetReservedIP_Basic(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testAccCheckisSubnetReservedIPDestroy(s *terraform.State) error {
+	sess, err := testAccProvider.Meta().(ClientSession).VpcV1API()
+	if err != nil {
+		return err
+	}
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "ibm_is_subnet_reserved_ip" {
+			continue
+		}
+
+		parts, err := idParts(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
+
+		opt := sess.NewGetSubnetReservedIPOptions(parts[0], parts[1])
+		_, response, err := sess.GetSubnetReservedIP(opt)
+		if err == nil {
+			return fmt.Errorf("Reserved IP still exists: %v", response)
+		}
+	}
+	return nil
 }
 
 func testAccCheckISSubnetReservedIPExists(resIPName string, reservedIPID *string) resource.TestCheckFunc {

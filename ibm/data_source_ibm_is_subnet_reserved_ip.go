@@ -21,11 +21,11 @@ import (
 // Define all the constants that matches with the given terrafrom attribute
 const (
 	// Request Param Constants
-	isSubNetID     = "subnet_id" // This is subnet id for the given reserved ip
-	isReservedIPID = "id"        // This is the id for the given reserved ip
+	isSubNetID     = "subnet"      // This is subnet id for the given reserved ip
+	isReservedIPID = "reserved_ip" // This is the id for the given reserved ip
 
 	// Response Param Constants
-	isReservedIP           = "address"     // This is the IP address for the given `isReservedIPID`
+	isReservedIPAddress    = "address"     // This is the IP address for the given `isReservedIPID`
 	isReservedIPAutoDelete = "auto_delete" // This mentions if reserved ip shall be deleted automatically
 	isReservedIPCreatedAt  = "created_at"  // Time when the reserved ip was created
 	isReservedIPhref       = "href"        // The url for the reserved ip
@@ -81,7 +81,7 @@ func dataSourceIBMISReservedIP() *schema.Resource {
 				DOC: https://test.cloud.ibm.com/apidocs/vpc?code=go#get-subnet-reserved-ip
 			*/
 
-			isReservedIP: {
+			isReservedIPAddress: {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The IP address",
@@ -135,10 +135,10 @@ func dataSdataSourceIBMISReservedIPRead(d *schema.ResourceData, meta interface{}
 	reservedIPID := d.Get(isReservedIPID).(string)
 	// The reserved IP might be created with the combination of both subnet ID and reserved IP id
 	// separated by '/'. So we should check it and split if required
-	parts, err := idParts(reservedIPID)
-	if err == nil {
-		reservedIPID = parts[1]
-	}
+	// parts, err := idParts(reservedIPID)
+	// if err == nil {
+	// 	reservedIPID = parts[1]
+	// }
 	msg := fmt.Sprintf("Trying to retrive the reserved IP for Subnet id: %s and reserved ip ID: %s", subnetID, reservedIPID)
 	fmt.Println(" ✅ " + "\033[35m" + msg + "\033[0m")
 

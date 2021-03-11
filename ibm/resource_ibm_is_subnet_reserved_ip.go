@@ -21,6 +21,7 @@ import (
 const (
 	isReservedIPProvisioning     = "provisioning"
 	isReservedIPProvisioningDone = "done"
+	isReservedIP                 = "reserved_ip"
 )
 
 func resourceIBMISReservedIP() *schema.Resource {
@@ -35,7 +36,17 @@ func resourceIBMISReservedIP() *schema.Resource {
 			Create: schema.DefaultTimeout(10 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
-
+		/*
+			d.Set(isReservedIPAddress, *rip.Address)
+			d.Set(isReservedIP, *rip.ID)
+			d.Set(isSubNetID, subnetID)
+			d.Set(isReservedIPAutoDelete, *rip.AutoDelete)
+			d.Set(isReservedIPCreatedAt, *rip.CreatedAt)
+			d.Set(isReservedIPhref, *rip.Href)
+			d.Set(isReservedIPName, *rip.Name)
+			d.Set(isReservedIPOwner, *rip.Owner)
+			d.Set(isReservedIPType, *rip.ResourceType)
+		*/
 		Schema: map[string]*schema.Schema{
 			/*
 				Request Parameters
@@ -46,6 +57,7 @@ func resourceIBMISReservedIP() *schema.Resource {
 			isSubNetID: {
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "The subnet identifier.",
 			},
 			isReservedIPAutoDelete: {
@@ -59,6 +71,46 @@ func resourceIBMISReservedIP() *schema.Resource {
 				Computed:    true,
 				Optional:    true,
 				Description: "The user-defined or system-provided name for this reserved IP.",
+			},
+			/*
+				Response Parameters
+				===================
+				All of these are computed and an user doesn't need to provide
+				these from outside.
+
+				DOC: https://test.cloud.ibm.com/apidocs/vpc#create-subnet-reserved-ip
+			*/
+
+			isReservedIPAddress: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Optional:    true,
+				Description: "The user-defined or system-provided name for this reserved IP.",
+			},
+			isReservedIP: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The unique identifier of the reserved IP.",
+			},
+			isReservedIPCreatedAt: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The date and time that the reserved IP was created.",
+			},
+			isReservedIPhref: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The URL for this reserved IP.",
+			},
+			isReservedIPOwner: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The owner of a reserved IP, defining whether it is managed by the user or the provider.",
+			},
+			isReservedIPType: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The resource type.",
 			},
 		},
 	}
@@ -114,10 +166,16 @@ func resourceIBMISReservedIPRead(d *schema.ResourceData, meta interface{}) error
 	if err != nil {
 		return err
 	}
+
+	allIDs, err := idParts(d.Id())
+	subnetID := allIDs[0]
+
 	if rip != nil {
+		d.Set(isReservedIPAddress, *rip.Address)
 		d.Set(isReservedIP, *rip.ID)
+		d.Set(isSubNetID, subnetID)
 		d.Set(isReservedIPAutoDelete, *rip.AutoDelete)
-		d.Set(isReservedIPCreatedAt, *rip.CreatedAt)
+		d.Set(isReservedIPCreatedAt, (*rip.CreatedAt).String())
 		d.Set(isReservedIPhref, *rip.Href)
 		d.Set(isReservedIPName, *rip.Name)
 		d.Set(isReservedIPOwner, *rip.Owner)

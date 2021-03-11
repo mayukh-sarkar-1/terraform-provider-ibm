@@ -71,7 +71,7 @@ func dataSourceIBMISReservedIPs() *schema.Resource {
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						isReservedIP: {
+						isReservedIPAddress: {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The IP address",
@@ -189,7 +189,7 @@ func getAllReservedIPs(sess *vpcv1.VpcV1, options *vpcv1.ListSubnetReservedIpsOp
 		reservedIP := map[string]interface{}{
 			isReservedIPID:         *data.ID,
 			isReservedIPName:       *data.Name,
-			isReservedIP:           *data.Address,
+			isReservedIPAddress:    *data.Address,
 			isReservedIPAutoDelete: *data.AutoDelete,
 			isReservedIPCreatedAt:  (*data.CreatedAt).String(),
 			isReservedIPhref:       *data.Href,

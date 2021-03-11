@@ -25,6 +25,7 @@ func TestAccIBMISSubnetReservedIP_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckisSubnetReservedIPDestroy,
 		Steps: []resource.TestStep{
 			{
+				// Tests create
 				Config: testAccCheckISSubnetReservedIPConfigBasic(vpcName, subnetName, reservedIPName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckISSubnetReservedIPExists(terraformTag, &reservedIPID),
@@ -32,6 +33,7 @@ func TestAccIBMISSubnetReservedIP_Basic(t *testing.T) {
 				),
 			},
 			{
+				// Tests Update
 				Config: testAccCheckISSubnetReservedIPConfigBasic(vpcName, subnetName, reservedIPName2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckISSubnetReservedIPExists(terraformTag, &reservedIPID),
@@ -70,16 +72,6 @@ func testAccCheckisSubnetReservedIPDestroy(s *terraform.State) error {
 func testAccCheckISSubnetReservedIPExists(resIPName string, reservedIPID *string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 
-		// // --------------------------------------------- //
-		// su, ok := s.RootModule().Resources[subnetName]
-		// if !ok {
-		// 	return fmt.Errorf("Not Found (subnet): %s", subnetName)
-		// }
-		// if su.Primary.ID == "" {
-		// 	return fmt.Errorf("No subnet ID is set")
-		// }
-
-		// ------------------------------------------------ //
 		rs, ok := s.RootModule().Resources[resIPName]
 		if !ok {
 			return fmt.Errorf("Not Found (reserved IP): %s", resIPName)
